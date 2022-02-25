@@ -17,7 +17,7 @@ public class Entrypoint {
             Thread profilerThread = new Thread(profiler, "Profiler thread");
             profilerThread.start();
         }
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         AtomicInteger[] IntersectionCounts = new AtomicInteger[maxPeople + 1];
         for (int i = 2; i <= maxPeople; i++) {
             IntersectionCounts[i] = new AtomicInteger();
@@ -61,8 +61,8 @@ public class Entrypoint {
             double probability = IntersectionCounts[i].doubleValue() / REPETITIONS;
             System.out.printf("%.2f%% for %d\n", probability * 100, i);
         }
-        long time = System.currentTimeMillis() - start;
-        System.out.printf("It took %.3fs\n", time / 1000d);
+        long time = System.nanoTime() - start;
+        System.out.printf("It took %.3fs\n", time / 1000000000d);
         if (profile) {
             profiler.stop();
             profiler.dump();
