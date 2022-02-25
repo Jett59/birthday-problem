@@ -8,7 +8,7 @@ public class Entrypoint {
     private static int maxPeople = 100;
 
     // Change to true to enable profiling
-    private static final boolean profile = true;
+    private static final boolean profile = false;
 
     public static void main(String[] args) throws Exception {
         Profiler profiler = null;
@@ -23,6 +23,7 @@ public class Entrypoint {
             IntersectionCounts[i] = new AtomicInteger();
         }
         int numThreads = Runtime.getRuntime().availableProcessors();
+        System.out.printf("Using %d worker threads\n", numThreads);
         Thread[] workers = new Thread[numThreads];
         int repetitionsPerWorker = REPETITIONS / numThreads;
         for (int thread = 0; thread < numThreads; thread++) {
