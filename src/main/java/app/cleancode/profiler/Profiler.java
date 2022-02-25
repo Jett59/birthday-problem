@@ -1,9 +1,11 @@
 package app.cleancode.profiler;
 
 import java.lang.Thread.State;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Profiler implements Runnable {
     private final Map<String, Statistics> samples = new HashMap<>();
@@ -29,7 +31,7 @@ public class Profiler implements Runnable {
                             sample = threadStatistics.samples
                                     .get(threadStatistics.samples.indexOf(sample));
                         }
-                        sample.occurrences++;
+                        sample.addOccurance(stackTraceElement.getLineNumber());
                     }
                     if (thread.getState().equals(State.RUNNABLE)) {
                         threadStatistics.running++;
@@ -55,9 +57,15 @@ public class Profiler implements Runnable {
             Collections.sort(threadStatistics.samples);
             Collections.reverse(threadStatistics.samples);
             for (Sample sample : threadStatistics.samples) {
-                System.out.printf("%.2f%%: %s:%s\n",
-                        sample.occurrences / (double) numSamples * 100d, sample.claz,
-                        sample.method);
+                @SuppressWarnings("unchecked")
+                Map.Entry<Integer, Integer>[] lineNumbers =
+                        (Map.Entry<Integer, Integer>[]) sample.lineNumbers.entrySet()
+                                .toArray(new HashMap.Entry[0]);
+                Arrays.sort(lineNumbers, (a, b) -> Integer.compare(a.getValue(), b.getValue()));
+                System.out.printf("%.2f%%: %s:%s (lines %s)\n",
+                        sample.occurrences / (double) numSamples * 100d, sample.claz, sample.method,
+                        Arrays.stream(lineNumbers).map(Map.Entry<Integer, Integer>::getKey)
+                                .map(i -> i.toString()).collect(Collectors.joining(", ")));
             }
         });
     }
