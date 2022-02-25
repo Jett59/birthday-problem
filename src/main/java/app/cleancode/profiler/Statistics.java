@@ -10,4 +10,8 @@ public class Statistics {
     public Statistics() {
         samples = new ArrayList<>();
     }
+
+    public int getSampleCount() {
+        return running + blocking;
+    }
 }

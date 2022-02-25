@@ -3,6 +3,7 @@ package app.cleancode.profiler;
 import java.lang.Thread.State;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,8 +53,8 @@ public class Profiler implements Runnable {
         System.out.printf("Recorded %d samples\n", numSamples);
         samples.forEach((thread, threadStatistics) -> {
             System.out.println("For thread: " + thread);
-            System.out.printf("Spent %.2f%% actually running\n", threadStatistics.running
-                    / (double) (threadStatistics.running + threadStatistics.blocking) * 100);
+            System.out.printf("Spent %.2f%% actually running\n",
+                    threadStatistics.running / (double) threadStatistics.getSampleCount() * 100);
             Collections.sort(threadStatistics.samples);
             Collections.reverse(threadStatistics.samples);
             for (Sample sample : threadStatistics.samples) {
@@ -61,11 +62,17 @@ public class Profiler implements Runnable {
                 Map.Entry<Integer, Integer>[] lineNumbers =
                         (Map.Entry<Integer, Integer>[]) sample.lineNumbers.entrySet()
                                 .toArray(new HashMap.Entry[0]);
-                Arrays.sort(lineNumbers, (a, b) -> Integer.compare(a.getValue(), b.getValue()));
-                System.out.printf("%.2f%%: %s:%s (lines %s)\n",
-                        sample.occurrences / (double) numSamples * 100d, sample.claz, sample.method,
-                        Arrays.stream(lineNumbers).map(Map.Entry<Integer, Integer>::getKey)
-                                .map(i -> i.toString()).collect(Collectors.joining(", ")));
+                Arrays.sort(lineNumbers,
+                        Comparator.comparingInt(Map.Entry<Integer, Integer>::getValue).reversed());
+                System.out
+                        .printf("%.2f%%: %s:%s (lines %s)\n",
+                                sample.occurrences
+                                        / (double) threadStatistics.getSampleCount() * 100d,
+                                sample.claz, sample.method, Arrays
+                                        .stream(lineNumbers).map(line -> String.format("%d(%.2f%%)",
+                                                line.getKey(), (double) line.getValue()
+                                                        / sample.occurrences * 100))
+                                        .collect(Collectors.joining(", ")));
             }
         });
     }
