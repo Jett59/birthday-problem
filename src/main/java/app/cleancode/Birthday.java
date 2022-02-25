@@ -2,10 +2,10 @@ package app.cleancode;
 
 import java.util.Random;
 
-public record Birthday(int day) {
+public class Birthday {
     private static Random rand = new Random();
 
-    public static Birthday random() {
-        return new Birthday(rand.nextInt(365) + 1);
+    public static int random() {
+        return rand.nextInt(365);
     }
 }
