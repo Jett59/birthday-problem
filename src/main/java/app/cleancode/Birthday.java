@@ -1,9 +1,9 @@
 package app.cleancode;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 public class Birthday {
-    private static Random rand = new Random();
+    private static final SplittableRandom rand = new SplittableRandom();
 
     public static int random() {
         return rand.nextInt(365);
