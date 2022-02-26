@@ -31,24 +31,18 @@ public class Entrypoint {
                 Birthday birthdayGenerator = new Birthday();
                 UsedBirthdays usedBirthdays = new UsedBirthdays();
                 for (int n = 2; n <= maxPeople; n++) {
-                    int numIntersections = 0;
                     for (int i = 0; i < repetitionsPerWorker; i++) {
-                        boolean intersected = false;
                         for (int j = 0; j < n; j++) {
                             int birthday = birthdayGenerator.random();
                             if (usedBirthdays.isUsed(birthday)) {
-                                intersected = true;
+                                IntersectionCounts[n].incrementAndGet();
                                 break;
                             } else {
                                 usedBirthdays.add(birthday);
                             }
                         }
-                        if (intersected) {
-                            numIntersections++;
-                        }
                         usedBirthdays.clear();
                     }
-                    IntersectionCounts[n].addAndGet(numIntersections);
                 }
             }, "worker " + thread);
             worker.start();
