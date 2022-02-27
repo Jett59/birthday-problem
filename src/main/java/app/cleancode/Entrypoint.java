@@ -28,14 +28,15 @@ public class Entrypoint {
         int repetitionsPerWorker = REPETITIONS / numThreads;
         for (int thread = 0; thread < numThreads; thread++) {
             Thread worker = new Thread(() -> {
-                Birthday birthdayGenerator = new Birthday();
+                Random primaryRand = new Random((int) System.nanoTime());
                 UsedBirthdays usedBirthdays = new UsedBirthdays();
+                int[] localIntersectionCounts = new int[maxPeople + 1];
                 for (int n = 2; n <= maxPeople; n++) {
                     for (int i = 0; i < repetitionsPerWorker; i++) {
                         for (int j = 0; j < n; j++) {
-                            int birthday = birthdayGenerator.random();
+                            int birthday = primaryRand.rand(365);
                             if (usedBirthdays.isUsed(birthday)) {
-                                IntersectionCounts[n].incrementAndGet();
+                                localIntersectionCounts[n]++;
                                 break;
                             } else {
                                 usedBirthdays.add(birthday);
@@ -43,6 +44,9 @@ public class Entrypoint {
                         }
                         usedBirthdays.clear();
                     }
+                }
+                for (int i = 2; i <= maxPeople; i++) {
+                    IntersectionCounts[i].addAndGet(localIntersectionCounts[i]);
                 }
             }, "worker " + thread);
             worker.start();
